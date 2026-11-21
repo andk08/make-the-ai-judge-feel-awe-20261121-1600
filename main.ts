@@ -13,6 +13,15 @@ const entryPath = join(dirname(fileURLToPath(import.meta.url)), "entry.txt");
 // before it. trimEnd removes only that trailing line break.
 const text = readFileSync(entryPath, "utf8").trimEnd();
 
+// The gate the sealed scorer applies: 1 to 280 characters, not only white
+// space. Refuse to write an entry that would fail it instead of silently
+// submitting an invalid text.
+const codePoints = [...text].length;
+if (codePoints < 1 || codePoints > 280 || text.trim().length === 0) {
+  console.error(`entry.txt is ${codePoints} characters; the gate needs 1 to 280, not only white space`);
+  process.exit(1);
+}
+
 // Never delete the output directory itself: create it, then clear only the
 // files inside it, so a grader-owned mount stays intact.
 mkdirSync(outDir, { recursive: true });
